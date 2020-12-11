@@ -171,9 +171,9 @@ class Variation(models.Model):
         return False
 
 
-class Exercise(AbstractSubmissionModel, AbstractLicenseModel, models.Model):
+class ExerciseBase(AbstractSubmissionModel, AbstractLicenseModel, models.Model):
     """
-    Model for an exercise
+    Model for an exercise base
     """
 
     objects = SubmissionManager()
@@ -182,6 +182,37 @@ class Exercise(AbstractSubmissionModel, AbstractLicenseModel, models.Model):
     category = models.ForeignKey(ExerciseCategory,
                                  verbose_name=_('Category'),
                                  on_delete=models.CASCADE)
+
+    equipment = models.ManyToManyField(Equipment,
+                                       verbose_name=_('Equipment'),
+                                       blank=True)
+    
+    muscles = models.ManyToManyField(Muscle,
+                                     blank=True,
+                                     verbose_name=_('Primary muscles'))
+    """Main muscles trained by the exercise"""                        
+
+    muscles_secondary = models.ManyToManyField(Muscle,
+                                               verbose_name=_('Secondary muscles'),
+                                               related_name='secondary_muscles_base',
+                                               blank=True)
+    """Secondary muscles trained by the exercise"""                                
+
+
+    equipment = models.ManyToManyField(Equipment,
+                                       verbose_name=_('Equipment'),
+                                       blank=True)
+    """Equipment needed by this exercise"""
+
+
+class Exercise(AbstractSubmissionModel, AbstractLicenseModel, models.Model):
+    """
+    Model for an exercise
+    """
+
+    objects = SubmissionManager()
+    """Custom manager"""
+
     description = models.TextField(max_length=2000,
                                    verbose_name=_('Description'),
                                    validators=[MinLengthValidator(40)])
@@ -195,22 +226,6 @@ class Exercise(AbstractSubmissionModel, AbstractLicenseModel, models.Model):
                                      verbose_name=_('Name'),
                                      default='')
     """The exercise's name, as entered by the user"""
-
-    muscles = models.ManyToManyField(Muscle,
-                                     blank=True,
-                                     verbose_name=_('Primary muscles'))
-    """Main muscles trained by the exercise"""
-
-    muscles_secondary = models.ManyToManyField(Muscle,
-                                               verbose_name=_('Secondary muscles'),
-                                               related_name='secondary_muscles',
-                                               blank=True)
-    """Secondary muscles trained by the exercise"""
-
-    equipment = models.ManyToManyField(Equipment,
-                                       verbose_name=_('Equipment'),
-                                       blank=True)
-    """Equipment needed by this exercise"""
 
     creation_date = models.DateField(_('Date'),
                                      auto_now_add=True,
